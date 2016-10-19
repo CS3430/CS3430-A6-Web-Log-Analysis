@@ -51,7 +51,7 @@ def count_ip_trbts(gen_ip_trbts_toops):
   global ip_trbts
   for toop in gen_ip_trbts_toops:
       ip = toop[0]
-      bytes = toop[1]
+      bytes = int(toop[1])
       if ip in ip_trbts:
           ip_trbts[ip].append(bytes)
       else:
@@ -85,14 +85,26 @@ def pipe_log_stats(fnpat, rootdir):
   count_ip_trbts(generate_ip_trbts_toops(logpat, glines, ip_group_num=1, trbytes_group_num=9))
   
 def std(seq):
-  pass
+  mean = sum(seq)/len(seq)
+  total_deviation = 0
+  for x in seq:
+    total_deviation += (x-mean)**2
+  return math.sqrt(total_deviation/float(len(seq)))
 
 def top_n(gen_log_stats, n):
   for i in xrange(n+1):
     print gen_log_stats.next()
 
 def generate_log_stats(ip_trbts):
-  pass
+  toop_list = []
+  for ip, byte_list in ip_trbts.iteritems():
+      sumBytes = sum(byte_list)
+      num_transfers = len(byte_list)
+      std_dev = std(byte_list)
+      toop_list.append((ip, sumBytes, num_transfers, std_dev))
+  for t in sorted(toop_list, key=lambda k: k[1], reverse=True):
+      yield t
+
 
 def unit_test_04(fnpat, rootdir, n):
   global ip_trbts
@@ -104,10 +116,8 @@ if __name__ == '__main__':
   # unit_test_01(sys.argv[1], sys.argv[2])
   # unit_test_02(sys.argv[1], sys.argv[2])
   # unit_test_03(sys.argv[1], sys.argv[2])
-  unit_test_03("small*.txt", "nasa_wlog_data/")
-  #unit_test_04(sys.argv[1], sys.argv[2], int(sys.argv[3]))
+  # unit_test_04(sys.argv[1], sys.argv[2], int(sys.argv[3]))
   #compute_log_stats(sys.argv[1], sys.argv[2])
   #pipe_log_stats(sys.argv[1], sys.argv[2])
   #top_n(gen_log_stats(ip_trbts), int(sys.argv[3]))
   pass
-
